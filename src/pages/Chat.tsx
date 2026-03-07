@@ -100,37 +100,15 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!input.trim()) return;
-    const userMessage = input;
-    const userMsg: Message = { id: Date.now().toString(), role: "user", content: userMessage };
+    const userMsg: Message = { id: Date.now().toString(), role: "user", content: input };
     setMessages(prev => [...prev, userMsg]);
     setInput("");
     setIsTyping(true);
 
-    try {
-      const res = await fetch("https://brandoncandia.app.n8n.cloud/webhook-test/jamito", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage }),
-      });
-
-      const data = await res.json();
-
-      // Try to extract text from common n8n response shapes
-      const responseText =
-        typeof data === "string" ? data :
-        data?.output ?? data?.message ?? data?.text ?? data?.response ?? JSON.stringify(data);
-
-      const assistantMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: responseText,
-      };
-      setMessages(prev => [...prev, assistantMsg]);
-    } catch (error) {
-      // Fallback to mock if webhook fails
-      const { text, cafes } = getResponse(userMessage);
+    setTimeout(() => {
+      const { text, cafes } = getResponse(input);
       const assistantMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -138,9 +116,8 @@ export default function ChatPage() {
         cafes,
       };
       setMessages(prev => [...prev, assistantMsg]);
-    } finally {
       setIsTyping(false);
-    }
+    }, 1200);
   };
 
   return (
